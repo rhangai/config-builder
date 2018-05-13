@@ -1,1 +1,4 @@
 #!/usr/bin/env node
+
+const ConfigBuilder = require( "../" );
+ConfigBuilder.runFromArgv( process.argv );
