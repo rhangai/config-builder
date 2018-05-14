@@ -11,6 +11,7 @@ module.exports = class ConfigBuilder {
 
 	constructor( options ) {
 		options = _.extend( {}, options );
+		options.cwd = options.cwd || process.cwd();
 		options.readers = _.defaults( options.readers, Reader.getDefaults() );
 		options.writers = _.defaults( options.writers, Writer.getDefaults() );
 
@@ -35,7 +36,8 @@ module.exports = class ConfigBuilder {
 			if ( !reader )
 				throw new Error( "Invalid type "+file.type );
 
-			return fs.readFile( file.path, 'utf8' )
+			const filepath = path.resolve( this._options.cwd, file.path );
+			return fs.readFile( filepath, 'utf8' )
 				.then( ( content ) => reader.call( null, content ) )
 				.then( ( config ) => this._add( config ) );
 		}
@@ -70,9 +72,10 @@ module.exports = class ConfigBuilder {
 			if ( !writer )
 				throw new Error( "Invalid type for writing "+file.type );
 
+			const filepath = path.resolve( this._options.cwd, file.path );
 			const config = _.cloneDeep( this._config );
 			return Promise.resolve( writer.call( null, config ) )
-				.then( ( content ) => fs.outputFile( file.path, content, 'utf8' ) );
+				.then( ( content ) => fs.outputFile( filepath, content, 'utf8' ) );
 		}
 
 		// Function, call
@@ -92,7 +95,7 @@ module.exports = class ConfigBuilder {
 
 	}
 
-	_mergeObject( obj ) {
+	_mergeObject( obj, cwd ) {
 		_.merge( this._config, obj );
 	}
 
