@@ -66,6 +66,10 @@ module.exports = class ConfigBuilder {
 
 		// String, write
 		if ( typeof(output) === 'string' ) {
+			if ( output === '-' ) {
+				console.log( JSON.stringify( this._config, null, "  " ) );
+				return;
+			}
 			const file = this._parseFile( output );
 
 			const writer = this._options.writers[file.type];
@@ -122,6 +126,8 @@ module.exports = class ConfigBuilder {
 	}
 
 	static runFromOptions( input, output, options ) {
+		if ( !output || ( output.length <= 0 ) )
+			output = "-";
 		const builder = new ConfigBuilder( options );
 		return Promise.resolve()
 			.then( () => builder.add( input ) )
