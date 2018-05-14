@@ -18,51 +18,94 @@ module.exports = class ConfigBuilder {
 		this._config  = {};
 	}
 
-
-	add( input ) {
+	add( input, process ) {
+		return Promise.resolve( this._add( input ) )
+			.then( () => ( process !== false ? this.process() : null ) )
+	}
+	_add( input ) {
 		// Array, resolve every item independently
 		if ( Array.isArray( input ) )
-			return Aigle.resolve( input ).eachSeries( ( i ) => this.add( i ) );
+			return Aigle.resolve( input ).eachSeries( ( i ) => this._add( i ) );
 
 		// String, try to load the file
 		if ( typeof(input) === 'string' ) {
-			let type = null;
-			const parsed = input.split( /(?!\\)\#/, 2 );
-			if ( parsed.length > 1 ) {
-				type  = parsed[1];
-				input = input.substr( 0, input.length - (type.length + 1) );
-			} else {
-				type = path.extname( input ).substr(1);
-			}
+			const file = this._parseFile( input );
 
-			const reader = this._options.readers[type];
+			const reader = this._options.readers[file.type];
 			if ( !reader )
-				throw new Error( "Invalid type "+type );
+				throw new Error( "Invalid type "+file.type );
 
-			return fs.readFile( input, 'utf8' )
+			return fs.readFile( file.path, 'utf8' )
 				.then( ( content ) => reader.call( null, content ) )
-				.then( ( config ) => this.add( config ) );
+				.then( ( config ) => this._add( config ) );
 		}
 
 		// Function, call the function
 		if ( typeof(input) === 'function' ) {
 			return Promise.resolve( input.call( null ) )
-				.then( ( config ) => this.add( config ) );
+				.then( ( config ) => this._add( config ) );
 		}
 
 		// Object, merge
 		if ( typeof(input) === 'object' ) {
-			this._mergeObject( input );
+			if ( !input )
+				return;
+			return this._mergeObject( input );
+		}
+	}
+
+	write( output ) {
+		return Promise.resolve( this._write( output ) );
+	}
+	_write( output ) {
+		// Array, resolve every item independently
+		if ( Array.isArray( output ) )
+			return Aigle.resolve( output ).eachLimit( 4, ( o ) => this._write( o ) );
+
+		// String, write
+		if ( typeof(output) === 'string' ) {
+			const file = this._parseFile( output );
+
+			const writer = this._options.writers[file.type];
+			if ( !writer )
+				throw new Error( "Invalid type for writing "+file.type );
+
+			const config = _.cloneDeep( this._config );
+			return Promise.resolve( writer.call( null, config ) )
+				.then( ( content ) => fs.outputFile( file.path, content, 'utf8' ) );
+		}
+
+		// Function, call
+		if ( typeof(output) === 'function' ) {
+			const config = _.cloneDeep( this._config );
+			return Promise.resolve( output.call( null, config ) );
+		}
+		
+		// Object, merge
+		if ( typeof(output) === 'object' ) {
+			_.extend( output, _.cloneDeep( this._config ) );
 			return;
 		}
+	}
+
+	process() {
+
 	}
 
 	_mergeObject( obj ) {
 		_.merge( this._config, obj );
 	}
 
-	write( output ) {
-		console.log( this._config );
+	_parseFile( filename ) {
+		let type = null;
+		const parsed = filename.split( /(?!\\)\#/, 2 );
+		if ( parsed.length > 1 ) {
+			type  = parsed[1];
+			filename = filename.substr( 0, filename.length - (type.length + 1) );
+		} else {
+			type = path.extname( filename ).substr(1);
+		}
+		return { path: filename, type: type };
 	}
 
 	static runFromArgv( argv ) {
@@ -72,7 +115,7 @@ module.exports = class ConfigBuilder {
 			.option( '-o, --output <paths>', "Output files", collect, [] )
 			.arguments( '[inputs...]' )
 			.parse( argv );
-		return this.runFromOptions( program.args[0], program.output, {} );
+		return this.runFromOptions( program.args, program.output, {} );
 	}
 
 	static runFromOptions( input, output, options ) {
