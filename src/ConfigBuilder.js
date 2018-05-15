@@ -66,18 +66,22 @@ module.exports = class ConfigBuilder {
 
 		// String, write
 		if ( typeof(output) === 'string' ) {
-			if ( output === '-' ) {
-				console.log( JSON.stringify( this._config, null, "  " ) );
-				return;
-			}
 			const file = this._parseFile( output );
 
 			const writer = this._options.writers[file.type];
 			if ( !writer )
 				throw new Error( "Invalid type for writing "+file.type );
 
-			const filepath = path.resolve( this._options.cwd, file.path );
+
 			const config = _.cloneDeep( this._config );
+
+			// Stdout writing
+			if ( file.path === '-' ) {
+				console.log( writer.call( null, config ) );
+				return;
+			}
+
+			const filepath = path.resolve( this._options.cwd, file.path );
 			return Promise.resolve( writer.call( null, config ) )
 				.then( ( content ) => fs.outputFile( filepath, content, 'utf8' ) );
 		}
