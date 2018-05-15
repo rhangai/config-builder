@@ -5,7 +5,7 @@ const fs = require( "fs-extra" );
 const path = require( "path" );
 const Reader = require( "./Reader" );
 const Writer = require( "./Writer" );
-
+const doT = require('dot');
 
 module.exports = class ConfigBuilder {
 
@@ -95,8 +95,43 @@ module.exports = class ConfigBuilder {
 		}
 	}
 
+	/**
+	 * Process file
+	 */
 	process() {
-
+		const proxy  = ConfigBuilder._createProxy( this._config );
+		this._config = JSON.parse( JSON.stringify( proxy ) );
+	}
+	/**
+	 * Create the proxy resolving the configuration
+	 */
+	static _createProxy( config, root ) {
+		if ( typeof(config) === 'string' ) {
+			const template = doT.template( config, _.extend( {}, doT.templateSettings, {
+				strip: false,
+			}));
+			return template( root );
+		} else if ( typeof(config) === 'object' ) {
+			const obj = Array.isArray( config ) ? [] : {};
+			root = root || obj;
+			_.each( config, function( value, key ) {
+				const enumerable = typeof(key) === 'string' && key.charAt(0) !== '$';
+				Object.defineProperty( obj, key, {
+					enumerable: enumerable,
+					configurable: true,
+					get: function() { 
+						const value = ConfigBuilder._createProxy( config[key], root );
+						Object.defineProperty( obj, key, { 
+							enumerable: enumerable, 
+							value: value,
+						} );
+						return value;
+					}
+				});
+			});
+			return obj;
+		}
+		return config;
 	}
 
 	_mergeObject( obj, cwd ) {
