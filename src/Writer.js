@@ -1,4 +1,6 @@
 const _ = require( "lodash" );
+const Util = require( "./Util" );
+
 module.exports = class Writer {
 
 	static getDefaults() {
@@ -20,18 +22,17 @@ module.exports = class Writer {
 		return JSON.stringify( config );
 	}
 
-        static writeStdout( config ) {
-		const prettyjson = require( "prettyjson" );
-		return prettyjson.render( config, { inlineArrays: true } );
-                return JSON.stringify( config, null, "  " );
-        }
+	static writeStdout( config ) {
+		const prettyjson = Util.tryRequire( "prettyjson" );
+		return prettyjson ? prettyjson.render( config ) : JSON.stringify( config, null, "  " );
+	}
 
 	static writeYaml( config ) {
-		const YAML = require( "js-yaml" );
+		const YAML = Util.require( "js-yaml", "Cannot write yaml files" );
 		return YAML.safeDump( config );
 	}
 	static writePHP( config ) {
-		return "<?php\nreturn "+Writer.writePHPValue( config );
+		return "<?php\nreturn "+Writer.writePHPValue( config )+";\n";
 	}
 	static writePHPValue( value, identChar, identLevel ) {
 		identChar  = identChar || "\t";

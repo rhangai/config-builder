@@ -1,11 +1,11 @@
 const commander = require( "commander" );
-const Aigle = require( "aigle" );
 const _ = require( "lodash" );
 const fs = require( "fs-extra" );
 const path = require( "path" );
+const doT = require('dot');
 const Reader = require( "./Reader" );
 const Writer = require( "./Writer" );
-const doT = require('dot');
+const Util = require( "./Util" );
 
 module.exports = class ConfigBuilder {
 
@@ -26,7 +26,7 @@ module.exports = class ConfigBuilder {
 	_add( input ) {
 		// Array, resolve every item independently
 		if ( Array.isArray( input ) )
-			return Aigle.resolve( input ).eachSeries( ( i ) => this._add( i ) );
+			return Util.asyncEachSeries( input, ( i ) => this._add( i ) );
 
 		// String, try to load the file
 		if ( typeof(input) === 'string' ) {
@@ -62,7 +62,7 @@ module.exports = class ConfigBuilder {
 	_write( output ) {
 		// Array, resolve every item independently
 		if ( Array.isArray( output ) )
-			return Aigle.resolve( output ).eachLimit( 4, ( o ) => this._write( o ) );
+			return Util.asyncEachSeries( output, ( o ) => this._write( o ) );
 
 		// String, write
 		if ( typeof(output) === 'string' ) {

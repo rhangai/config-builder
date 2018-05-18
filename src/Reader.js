@@ -1,3 +1,4 @@
+const Util = require( "./Util" );
 module.exports = class Reader {
 
 	static getDefaults() {
@@ -21,12 +22,12 @@ module.exports = class Reader {
 	}
 	
 	static readJson( input ) {
-		const JSON5 = require( "json5" );
-		return JSON5.parse( input );
+		const JsonLib = Util.tryRequire( "json5" ) || JSON;
+		return JsonLib.parse( input );
 	}
 
 	static readYaml( input ) {
-		const YAML = require( "js-yaml" );
+		const YAML = Util.require( "js-yaml", "Cannot read yaml files" );
 		return YAML.safeLoad( input );
 	}
 
