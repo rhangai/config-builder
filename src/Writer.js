@@ -5,6 +5,7 @@ module.exports = class Writer {
 		return {
 			js:   Writer.writeJs,
 			json: Writer.writeJson,
+			stdout: Writer.writeStdout,
 			yaml: Writer.writeYaml,
 			yml:  Writer.writeYaml,
 			php:  Writer.writePHP,
@@ -18,6 +19,12 @@ module.exports = class Writer {
 	static writeJson( config ) {
 		return JSON.stringify( config );
 	}
+
+        static writeStdout( config ) {
+		const prettyjson = require( "prettyjson" );
+		return prettyjson.render( config, { inlineArrays: true } );
+                return JSON.stringify( config, null, "  " );
+        }
 
 	static writeYaml( config ) {
 		const YAML = require( "js-yaml" );

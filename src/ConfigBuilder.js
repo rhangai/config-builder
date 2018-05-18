@@ -67,6 +67,8 @@ module.exports = class ConfigBuilder {
 		// String, write
 		if ( typeof(output) === 'string' ) {
 			const file = this._parseFile( output );
+			if ( file.path === "-" && !file.type )
+				file.type = "stdout";
 
 			const writer = this._options.writers[file.type];
 			if ( !writer )
@@ -144,13 +146,17 @@ module.exports = class ConfigBuilder {
 
 	_parseFile( filename ) {
 		let type = null;
-		const parsed = filename.split( /(?!\\)\#/, 2 );
-		if ( parsed.length > 1 ) {
-			type  = parsed[1];
-			filename = filename.substr( 0, filename.length - (type.length + 1) );
-		} else {
-			type = path.extname( filename ).substr(1);
+		for ( let i = 0, len = filename.length; i<len; ++i ) {
+			if ( filename.charAt(i) === ":" && (i == 0 || ( filename.charAt(i-1) !== "\\" ) ) ) {
+				type     = filename.substr(i+1);
+				filename = filename.substr(0, i);
+				break;
+			}
 		}
+		filename = filename.replace( /\\\:/g, ":" );
+		
+		if ( type == null )
+			type = path.extname( filename ).substr(1);
 		return { path: filename, type: type };
 	}
 
