@@ -106,7 +106,10 @@ module.exports = class ConfigBuilder {
 	 * Process file
 	 */
 	process() {
-		const proxy  = ConfigBuilder._createProxy( this._config );
+		Object.defineProperty( this._config, '$env', {
+			get: function() { return process.env; },
+		});
+		const proxy  = ConfigBuilder._createProxy( this._config, this._config );
 		this._config = JSON.parse( JSON.stringify( proxy ) );
 	}
 	/**
