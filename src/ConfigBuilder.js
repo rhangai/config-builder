@@ -57,7 +57,8 @@ module.exports = class ConfigBuilder {
 	}
 
 	write( output ) {
-		return Promise.resolve( this._write( output ) );
+		return Promise.resolve( this._write( output ) )
+			.then( () => this._config );
 	}
 	_write( output ) {
 		// Array, resolve every item independently
@@ -167,17 +168,18 @@ module.exports = class ConfigBuilder {
 			.option( '-o, --output <paths>', "Output files", collect, [] )
 			.arguments( '[inputs...]' )
 			.parse( argv );
-		return this.runFromOptions( program.args, program.output, {} );
-	}
 
-	static runFromOptions( input, output, options ) {
+		let output = program.output;
 		if ( !output || ( output.length <= 0 ) )
 			output = "-";
+		return ConfigBuilder.run( program.args, output, {} );
+	}
+
+	static run( input, output, options ) {
 		const builder = new ConfigBuilder( options );
 		return Promise.resolve()
 			.then( () => builder.add( input ) )
-			.then( () => builder.write( output ) )
-			.then( () => true );
+			.then( () => builder.write( output ) );
 	}
 
 };
