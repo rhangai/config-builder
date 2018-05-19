@@ -1,7 +1,7 @@
 ConfigBuilder
 ==============================
 
-Configuration helper.
+Create your configuration files with ease.
 
 Installation
 --------------------------
@@ -20,9 +20,9 @@ config-builder [inputs...] -o output.config.json
 
 Processing
 -----------
-Inputs will be processed by using the doT template syntax. And keys starting with `$` are skipped.
+Inputs will merged, and processed by using the doT template syntax. And keys starting with `$` are skipped.
 
-### input.json
+### `input.json`
 ```json
 {
   "$database": {
@@ -47,7 +47,7 @@ Inputs will be processed by using the doT template syntax. And keys starting wit
 }
 ```
 
-Will output
+When run `config-builder input.json`, will output
 ```json
 {
   "mysql": {
@@ -66,6 +66,8 @@ Will output
   }
 }
 ```
+
+You can access the environment variables with `it.$env` (Therefore you cannot overwrite it with your settings)
 
 Types
 ----------
