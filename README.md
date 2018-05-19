@@ -1,11 +1,70 @@
 ConfigBuilder
 ==============================
 
+Configuration helper.
+
+Installation
+--------------------------
+```sh
+npm install --save-dev "@renanhangai/config-builder"
+# or
+yarn add --dev "@renanhangai/config-builder"
+```
+
 Usage 
 ----------
 
 ```sh
 config-builder [inputs...] -o output.config.json
+```
+
+Processing
+-----------
+Inputs will be processed by using the doT template syntax. And keys starting with `$` are skipped.
+
+### input.json
+```json
+{
+  "$database": {
+    "name":     "my_database",
+    "host":     "localhost",
+    "username": "root",
+    "password": "root"
+  },
+  "mysql": {
+    "dns": "mysql:dbname={{= it.$database.name }};host={{= it.$database.host }};port={{= it.$database.port || 3316 }};charset=utf8",
+    "username": "{{= it.$database.username }}",
+    "password": "{{= it.$database.password }}"
+  },
+  "sh": {
+    "cmd": "mysql",
+    "args": [
+      "-u", "{{= it.$database.username }}",
+      "-p{{= it.$database.password }}",
+      "{{= it.$database.name }}"
+    ]
+  }
+}
+```
+
+Will output
+```json
+{
+  "mysql": {
+    "dns": "mysql:dbname=my_database;host=localhost;port=3316;charset=utf8",
+    "username": "root",
+    "password": "root"
+  },
+  "sh": {
+    "cmd": "mysql",
+    "args": [
+      "-u",
+      "root",
+      "-proot"
+      "my_database"
+    ]
+  }
+}
 ```
 
 Types
