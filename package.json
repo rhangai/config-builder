@@ -1,6 +1,7 @@
 {
   "name": "@renanhangai/config-builder",
   "version": "0.0.0",
+  "keywords": [ "config", "configuration", "settings", "builder", "generator" ],
   "main": "index.js",
   "license": "MIT",
   "bin": {
