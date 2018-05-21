@@ -19,9 +19,9 @@ module.exports = class ConfigBuilder {
 		this._config  = {};
 	}
 
-	add( input, process ) {
+	add( input, needProcess ) {
 		return Promise.resolve( this._add( input ) )
-			.then( () => ( process !== false ? this.process() : null ) )
+			.then( () => ( needProcess !== false ? this.process() : null ) )
 	}
 	_add( input ) {
 		// Array, resolve every item independently
@@ -38,7 +38,7 @@ module.exports = class ConfigBuilder {
 
 			const filepath = path.resolve( this._options.cwd, file.path );
 			return fs.readFile( filepath, 'utf8' )
-				.then( ( content ) => reader.call( null, content ) )
+				.then( ( content ) => reader.call( null, content ), ( err ) => ( file.optional ? null : Promise.reject( err ) ) )
 				.then( ( config ) => this._add( config ) );
 		}
 
@@ -149,6 +149,12 @@ module.exports = class ConfigBuilder {
 	}
 
 	_parseFile( filename ) {
+		let optional = false;
+		if ( filename.charAt(0) === '+' ) {
+			optional = true;
+			filename = filename.substr(1);
+		}
+
 		let type = null;
 		for ( let i = 0, len = filename.length; i<len; ++i ) {
 			if ( filename.charAt(i) === ":" && (i == 0 || ( filename.charAt(i-1) !== "\\" ) ) ) {
@@ -158,10 +164,11 @@ module.exports = class ConfigBuilder {
 			}
 		}
 		filename = filename.replace( /\\\:/g, ":" );
+		filename = filename.replace( /\\\+/g, "+" );
 		
 		if ( type == null )
 			type = path.extname( filename ).substr(1);
-		return { path: filename, type: type };
+		return { path: filename, type: type, optional: optional };
 	}
 
 	static runFromArgv( argv ) {
