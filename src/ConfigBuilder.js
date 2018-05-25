@@ -174,7 +174,7 @@ module.exports = class ConfigBuilder {
 	static runFromArgv( argv ) {
 		const program = new commander.Command;
 		program
-			.version( '0.0.1' )
+			.version( require( "../package.json" ).version )
 			.option( '-o, --output <paths>', "Output files", collect, [] )
 			.arguments( '[inputs...]' )
 			.parse( argv );
