@@ -15,7 +15,31 @@ Usage
 ----------
 
 ```sh
-config-builder [inputs...] -o output.config.json
+config-builder [inputs...] -o outputfile
+```
+
+### Types ###
+
+Every file will be parsed/written according to its extension. The following types are supported:
+
+| Type  | Input | Output |
+| ----- | ----- | -----  |
+| js    | Y     | Y      |
+| json  | Y     | Y      |
+| json5 | Y     | N      |
+| yaml  | Y     | Y      |
+| php   | N     | Y      |
+
+```sh
+# Reading
+config-builder input.json
+config-builder input.default.json +input.yml
+config-builder input.default.json input2.yml +custom.json +env.json
+
+# Writing
+config-builder [inputs...] -o file.js
+config-builder [inputs...] -o file.yml
+config-builder [inputs...] -o file.php
 ```
 
 Processing
@@ -69,18 +93,42 @@ When run `config-builder input.json`, will output
 
 You can access the environment variables with `it.$env` (Therefore you cannot overwrite it with your settings)
 
-Types
+Inline Configuration
 ----------
 
-Every file will be parsed/written according to its extension. The following types are supported:
+Inline configuration is a way to provide inline
+```sh
+config-builder debug=false
+# { debug: false }
 
-| Type  | Input | Output |
-| ----- | ----- | -----  |
-| js    | Y     | Y      |
-| json  | Y     | Y      |
-| json5 | Y     | N      |
-| yaml  | Y     | Y      |
-| php   | N     | Y      |
+config-builder input.json '$database.password=123456'
+# {
+#   "mysql": {
+#     "dns": "mysql:dbname=my_database;host=localhost;port=3316;charset=utf8",
+#     "username": "root",
+#     "password": "123456"
+#   },
+#   "sh": {
+#     "cmd": "mysql",
+#     "args": [
+#       "-u",
+#       "root",
+#       "-p123456",
+#       "my_database"
+#     ]
+#   }
+# }
+```
+
+Optional Inputs
+--------
+
+All inputs are mandatory, but sometimes it is useful to have optional config files to overwrite your configuration if they exist. In that case, you can:
+```sh
+config-builder input.default.json +input.json
+```
+
+Then, the file `input.json` will not be required, and will not throw in the case it does not exists.
 
 Advanced options
 ------------------
