@@ -30,6 +30,9 @@ module.exports = class ConfigBuilder {
 
 		// String, try to load the file
 		if ( typeof(input) === 'string' ) {
+			const inputObject = this._parseInputConfig( input );
+			if ( inputObject )
+				return this._add( inputObject );
 			const file = this._parseFile( input );
 
 			const reader = this._options.readers[file.type];
@@ -169,6 +172,26 @@ module.exports = class ConfigBuilder {
 		if ( type == null )
 			type = path.extname( filename ).substr(1);
 		return { path: filename, type: type, optional: optional };
+	}
+
+	_parseInputConfig( input ) {
+		let searchIndex = 0, equalSignIndex;
+		while ( true ) {
+			equalSignIndex = input.indexOf( "=", searchIndex );
+			if ( equalSignIndex < 0 )
+				return false;
+			if ( equalSignIndex == 0 || input.charAt( equalSignIndex - 1 ) !== "\\" )
+				break;
+			searchIndex = equalSignIndex + 1;
+		}
+
+		const configPath = input.substr( 0, equalSignIndex ).trim();
+		let configValue = input.substr( equalSignIndex + 1 ).trim();
+		try { configValue = JSON.parse( configValue ); } catch(e) {};
+
+		const obj = {};
+		_.set( obj, configPath, configValue );
+		return obj;
 	}
 
 	static runFromArgv( argv ) {
