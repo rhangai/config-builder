@@ -12,6 +12,7 @@ module.exports = class ConfigBuilder {
 	constructor( options ) {
 		options = _.extend( {}, options );
 		options.cwd = options.cwd || process.cwd();
+		options.outputDir = options.outputDir || options.cwd;
 		options.readers = _.defaults( options.readers, Reader.getDefaults() );
 		options.writers = _.defaults( options.writers, Writer.getDefaults() );
 
@@ -87,7 +88,7 @@ module.exports = class ConfigBuilder {
 				return;
 			}
 
-			const filepath = path.resolve( this._options.cwd, file.path );
+			const filepath = path.resolve( this._options.outputDir, file.path );
 			return Promise.resolve( writer.call( null, config ) )
 				.then( ( content ) => fs.outputFile( filepath, content, 'utf8' ) );
 		}
@@ -199,13 +200,16 @@ module.exports = class ConfigBuilder {
 		program
 			.version( require( "../package.json" ).version )
 			.option( '-o, --output <paths>', "Output files", collect, [] )
+			.option( '-d, --output-dir <dir>', "Directory to output files" )
 			.arguments( '[inputs...]' )
 			.parse( argv );
 
 		let output = program.output;
 		if ( !output || ( output.length <= 0 ) )
 			output = "-";
-		return ConfigBuilder.run( program.args, output, {} );
+		return ConfigBuilder.run( program.args, output, {
+			outputDir: program.outputDir,
+		} );
 	}
 
 	static run( input, output, options ) {
