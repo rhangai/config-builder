@@ -130,6 +130,16 @@ config-builder input.default.json +input.json
 
 Then, the file `input.json` will not be required, and will not throw in the case it does not exists.
 
+Environment variable inputs
+--------
+
+If the input begins with `$`, then it will be read directly from process.env
+```sh
+config-builder \$MY_CONFIG_FILE
+```
+
+Then, the input will be used as process.env.MY_CONFIG_FILE
+
 Advanced options
 ------------------
 
