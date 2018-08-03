@@ -31,6 +31,12 @@ module.exports = class ConfigBuilder {
 
 		// String, try to load the file
 		if ( typeof(input) === 'string' ) {
+			if ( !input )
+				return;
+				
+			if ( input.charAt(0) === '$' )
+				return this._add( process.env[input.substr(1)] );
+
 			const inputObject = this._parseInputConfig( input );
 			if ( inputObject )
 				return this._add( inputObject );
