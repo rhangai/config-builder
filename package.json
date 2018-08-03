@@ -1,6 +1,6 @@
 {
   "name": "@renanhangai/config-builder",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "keywords": [
     "config",
     "configuration",
@@ -28,5 +28,8 @@
   },
   "description": "Configure files with ease",
   "repository": "https://github.com/renanhangai/config-builder.git",
-  "author": "renanhangai <hangai.renan@gmail.com>"
+  "author": "renanhangai <hangai.renan@gmail.com>",
+  "devDependencies": {
+    "standard-version": "^4.4.0"
+  }
 }
