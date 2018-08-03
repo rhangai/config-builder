@@ -12,7 +12,7 @@ module.exports = class ConfigBuilder {
 	constructor( options ) {
 		options = _.extend( {}, options );
 		options.cwd = options.cwd || process.cwd();
-		options.outputDir = options.outputDir || options.cwd;
+		options.outputDir = path.resolve( options.cwd, options.outputDir || "./" );
 		options.readers = _.defaults( options.readers, Reader.getDefaults() );
 		options.writers = _.defaults( options.writers, Writer.getDefaults() );
 
@@ -213,8 +213,10 @@ module.exports = class ConfigBuilder {
 		let output = program.output;
 		if ( !output || ( output.length <= 0 ) )
 			output = "-";
+
+		const outputDir = (program.outputDir || "").split( ":" );
 		return ConfigBuilder.run( program.args, output, {
-			outputDir: program.outputDir,
+			outputDir: _.findLast( outputDir, Boolean ),
 		} );
 	}
 
