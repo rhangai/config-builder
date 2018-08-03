@@ -140,6 +140,35 @@ config-builder \$MY_CONFIG_FILE
 
 Then, the input will be used as process.env.MY_CONFIG_FILE
 
+Environment variable inputs
+--------
+
+If the input begins with `$`, then it will be read directly from process.env
+```sh
+config-builder \$MY_CONFIG_FILE
+```
+
+Then, the input will be used as process.env.MY_CONFIG_FILE
+
+Output directory
+--------
+
+You can pass an `--output-dir` parameter to output files on the given directory
+```sh
+config-builder test.json --output-dir build/configs -o config.json -o config.yml
+```
+
+The files will be generated as `build/configs/config.json` and `build/configs/config.yml`
+
+There is an option to pass an output dir as a list of paths, so the last valid path will be used (good with environmental variables). Ex:
+```sh
+config-builder test.json --output-dir "dist:config" -o output.json
+config-builder test.json --output-dir "dist:$OUTPUT_DIR" -o output.json
+```
+On the first case `dist:config` will be split into `[ "dist", "config" ]`, as both are valid paths, but `config` comes after, the file will be generated as `config/output.json`
+
+On the second one `dist:$OUTPUT_DIR` will be expandaded, and if OUTPUT_DIR is empty, it will be `dist:` -> `["dist", ""]`
+
 Advanced options
 ------------------
 
