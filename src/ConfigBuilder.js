@@ -34,7 +34,7 @@ module.exports = class ConfigBuilder {
 			if ( !input )
 				return;
 				
-			if ( input.charAt(0) === '$' )
+			if ( input.charAt(0) === '$' && input.indexOf("=") < 0 ) 
 				return this._add( process.env[input.substr(1)] );
 
 			const inputObject = this._parseInputConfig( input );
