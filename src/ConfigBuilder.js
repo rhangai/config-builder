@@ -112,6 +112,30 @@ module.exports = class ConfigBuilder {
 		}
 	}
 
+	compileTemplate( template ) {
+		return Promise.resolve( this._compileTemplate( template ) )
+			.then( () => this._config );
+	}
+	_compileTemplate( template ) {
+		// Array, resolve every item independently
+		if ( Array.isArray( template ) )
+			return Util.asyncEachSeries( template, ( t ) => this._compileTemplate( t ) );
+		if ( typeof(template) !== 'string' )
+			return;
+
+		const templatePaths = template.split( ":" );
+		const inPath  = templatePaths[0];
+		const outPath = path.resolve( this._options.outputDir, templatePaths[1] );
+		return fs.readFile( inPath, 'utf8' )
+			.then( ( content ) => {
+				const template = doT.template( content, _.extend( {}, doT.templateSettings, {
+					strip: false,
+				}));
+				return template( this._config );
+			})
+			.then( ( content ) => fs.outputFile( outPath, content, 'utf8' ) );
+	}
+
 	/**
 	 * Process file
 	 */
@@ -206,6 +230,7 @@ module.exports = class ConfigBuilder {
 		program
 			.version( require( "../package.json" ).version )
 			.option( '-o, --output <paths>', "Output files", collect, [] )
+			.option( '-t, --template <paths>', "Compile template files", collect, [] )
 			.option( '-d, --output-dir <dir>', "Directory to output files" )
 			.arguments( '[inputs...]' )
 			.parse( argv );
@@ -217,6 +242,7 @@ module.exports = class ConfigBuilder {
 		const outputDir = (program.outputDir || "").split( ":" );
 		return ConfigBuilder.run( program.args, output, {
 			outputDir: _.findLast( outputDir, Boolean ),
+			template: [].concat( program.template ).filter( Boolean ),
 		} );
 	}
 
@@ -224,6 +250,7 @@ module.exports = class ConfigBuilder {
 		const builder = new ConfigBuilder( options );
 		return Promise.resolve()
 			.then( () => builder.add( input ) )
+			.then( () => builder.compileTemplate( options.template ) )
 			.then( () => builder.write( output ) );
 	}
 
