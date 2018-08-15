@@ -94,7 +94,7 @@ module.exports = class ConfigBuilder {
 				return;
 			}
 
-			const filepath = path.resolve( this._options.outputDir, file.path );
+			const filepath = this._resolveOutputPath( file.path );
 			return Promise.resolve( writer.call( null, config ) )
 				.then( ( content ) => fs.outputFile( filepath, content, 'utf8' ) );
 		}
@@ -125,7 +125,7 @@ module.exports = class ConfigBuilder {
 
 		const templatePaths = template.split( ":" );
 		const inPath  = templatePaths[0];
-		const outPath = path.resolve( this._options.outputDir, templatePaths[1] );
+		const outPath = this._resolveOutputPath( templatePaths[1] );
 		return fs.readFile( inPath, 'utf8' )
 			.then( ( content ) => {
 				const template = doT.template( content, _.extend( {}, doT.templateSettings, {
@@ -134,6 +134,12 @@ module.exports = class ConfigBuilder {
 				return template( this._config );
 			})
 			.then( ( content ) => fs.outputFile( outPath, content, 'utf8' ) );
+	}
+
+	_resolveOutputPath( filename ) {
+		if ( filename.substr(0, 2) === "./" )
+			return filename;
+		return path.resolve( this._options.outputDir, filename );
 	}
 
 	/**
