@@ -169,6 +169,30 @@ On the first case `dist:config` will be split into `[ "dist", "config" ]`, as bo
 
 On the second one `dist:$OUTPUT_DIR` will be expandaded, and if OUTPUT_DIR is empty, it will be `dist:` -> `["dist", ""]`
 
+Extending configuration
+--------
+
+If the input configuration have the property `$extends` it will be loaded before the current file. May be anything such as the arguments above.
+
+```json
+{
+  "$extends": "other.json",
+  "debug": false
+}
+```
+
+```json
+// other.json
+{
+  "$extends": "other.json",
+  "debug": true,
+  "example": 10
+}
+```
+
+If you run `config-build input.json` the output will be `{ debug: false, example: 10 }`
+
+
 Advanced options
 ------------------
 
