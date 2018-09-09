@@ -12,6 +12,7 @@ module.exports = class ConfigBuilder {
 	constructor( options ) {
 		options = _.extend( {}, options );
 		options.cwd = options.cwd || process.cwd();
+		options.maxDepth = (options.maxDepth|0) || 50;
 		options.outputDir = path.resolve( options.cwd, options.outputDir || "./" );
 		options.readers = _.defaults( options.readers, Reader.getDefaults() );
 		options.writers = _.defaults( options.writers, Writer.getDefaults() );
@@ -24,10 +25,15 @@ module.exports = class ConfigBuilder {
 		return Promise.resolve( this._add( input, this._options.cwd ) )
 			.then( () => ( needProcess !== false ? this.process() : null ) )
 	}
-	_add( input, cwd ) {
+	_add( input, cwd, level ) {
+		level = level | 0;
+		if ( level >= this._options.maxDepth )
+			throw new Error( `Too nested configuration. Only allowed ${this._options.maxDepth} levels when configuring` );
+		const nextLevel = level + 1;
+
 		// Array, resolve every item independently
 		if ( Array.isArray( input ) )
-			return Util.asyncEachSeries( input, ( i ) => this._add( i, cwd ) );
+			return Util.asyncEachSeries( input, ( i ) => this._add( i, cwd, nextLevel ) );
 
 		// String, try to load the file
 		if ( typeof(input) === 'string' ) {
@@ -36,11 +42,11 @@ module.exports = class ConfigBuilder {
 				
 			// If is an environment variable, try to add it
 			if ( input.charAt(0) === '$' && input.indexOf("=") < 0 ) 
-				return this._add( process.env[input.substr(1)], cwd );
+				return this._add( process.env[input.substr(1)], cwd, nextLevel );
 
 			const inputObject = this._parseInputConfig( input );
 			if ( inputObject )
-				return this._add( inputObject, cwd );
+				return this._add( inputObject, cwd, nextLevel );
 			const file = this._parseFile( input );
 
 			const reader = this._options.readers[file.type];
@@ -50,20 +56,20 @@ module.exports = class ConfigBuilder {
 			const filepath = path.resolve( cwd, file.path );
 			return fs.readFile( filepath, 'utf8' )
 				.then( ( content ) => reader.call( null, content ), ( err ) => ( file.optional ? null : Promise.reject( err ) ) )
-				.then( ( config ) => this._add( config, path.dirname( filepath ) ) );
+				.then( ( config ) => this._add( config, path.dirname( filepath ), nextLevel ) );
 		}
 
 		// Function, call the function
 		if ( typeof(input) === 'function' ) {
 			return Promise.resolve( input.call( null ) )
-				.then( ( config ) => this._add( config, cwd ) );
+				.then( ( config ) => this._add( config, cwd, nextLevel ) );
 		}
 
 		// Object, merge
 		if ( typeof(input) === 'object' ) {
 			if ( !input )
 				return;
-			return this._mergeObject( input, cwd );
+			return this._mergeObject( input, cwd, nextLevel );
 		}
 	}
 
@@ -185,10 +191,10 @@ module.exports = class ConfigBuilder {
 		return config;
 	}
 
-	_mergeObject( obj, cwd ) {
+	_mergeObject( obj, cwd, level ) {
 		if ( typeof(obj) === 'object' && obj.$extends ) {
 			return Promise.resolve()
-				.then( () => this._add( obj.$extends, cwd ) )
+				.then( () => this._add( obj.$extends, cwd, level ) )
 				.then( () => _.merge( this._config, _.omit( obj, [ '$extends' ] ) ) );
 		}
 		_.merge( this._config, obj );
@@ -244,6 +250,7 @@ module.exports = class ConfigBuilder {
 			.option( '-o, --output <paths>', "Output files", collect, [] )
 			.option( '-t, --template <paths>', "Compile template files", collect, [] )
 			.option( '-d, --output-dir <dir>', "Directory to output files" )
+			.option( '--depth <depth>', "The maxDepth option" )
 			.arguments( '[inputs...]' )
 			.parse( argv );
 
@@ -253,6 +260,7 @@ module.exports = class ConfigBuilder {
 
 		const outputDir = (program.outputDir || "").split( ":" );
 		return ConfigBuilder.run( program.args, output, {
+			maxDepth: program.depth,
 			outputDir: _.findLast( outputDir, Boolean ),
 			template: [].concat( program.template ).filter( Boolean ),
 		} );
