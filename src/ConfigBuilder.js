@@ -21,48 +21,49 @@ module.exports = class ConfigBuilder {
 	}
 
 	add( input, needProcess ) {
-		return Promise.resolve( this._add( input ) )
+		return Promise.resolve( this._add( input, this._options.cwd ) )
 			.then( () => ( needProcess !== false ? this.process() : null ) )
 	}
-	_add( input ) {
+	_add( input, cwd ) {
 		// Array, resolve every item independently
 		if ( Array.isArray( input ) )
-			return Util.asyncEachSeries( input, ( i ) => this._add( i ) );
+			return Util.asyncEachSeries( input, ( i ) => this._add( i, cwd ) );
 
 		// String, try to load the file
 		if ( typeof(input) === 'string' ) {
 			if ( !input )
 				return;
 				
+			// If is an environment variable, try to add it
 			if ( input.charAt(0) === '$' && input.indexOf("=") < 0 ) 
-				return this._add( process.env[input.substr(1)] );
+				return this._add( process.env[input.substr(1)], cwd );
 
 			const inputObject = this._parseInputConfig( input );
 			if ( inputObject )
-				return this._add( inputObject );
+				return this._add( inputObject, cwd );
 			const file = this._parseFile( input );
 
 			const reader = this._options.readers[file.type];
 			if ( !reader )
 				throw new Error( "Invalid type "+file.type );
 
-			const filepath = path.resolve( this._options.cwd, file.path );
+			const filepath = path.resolve( cwd, file.path );
 			return fs.readFile( filepath, 'utf8' )
 				.then( ( content ) => reader.call( null, content ), ( err ) => ( file.optional ? null : Promise.reject( err ) ) )
-				.then( ( config ) => this._add( config ) );
+				.then( ( config ) => this._add( config, path.dirname( filepath ) ) );
 		}
 
 		// Function, call the function
 		if ( typeof(input) === 'function' ) {
 			return Promise.resolve( input.call( null ) )
-				.then( ( config ) => this._add( config ) );
+				.then( ( config ) => this._add( config, cwd ) );
 		}
 
 		// Object, merge
 		if ( typeof(input) === 'object' ) {
 			if ( !input )
 				return;
-			return this._mergeObject( input );
+			return this._mergeObject( input, cwd );
 		}
 	}
 
@@ -185,6 +186,11 @@ module.exports = class ConfigBuilder {
 	}
 
 	_mergeObject( obj, cwd ) {
+		if ( typeof(obj) === 'object' && obj.$extends ) {
+			return Promise.resolve()
+				.then( () => this._add( obj.$extends, cwd ) )
+				.then( () => _.merge( this._config, _.omit( obj, [ '$extends' ] ) ) );
+		}
 		_.merge( this._config, obj );
 	}
 
