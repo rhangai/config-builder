@@ -11,4 +11,5 @@ RUN pkg --config package.json --targets node10-alpine-x64 --output config-builde
 FROM alpine
 COPY --from=build /app/config-builder /usr/local/bin/config-builder
 RUN apk add --no-cache libstdc++
+WORKDIR /config
 ENTRYPOINT ["/usr/local/bin/config-builder"]

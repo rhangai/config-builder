@@ -1,4 +1,6 @@
 #!/usr/bin/env node
 
+require("dotenv").config();
+
 const ConfigBuilder = require( "../" );
 ConfigBuilder.runFromArgv( process.argv );
