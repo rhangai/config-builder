@@ -19,6 +19,7 @@
     "commander": "^2.15.1",
     "dot": "^1.1.2",
     "fs-extra": "^6.0.1",
+    "get-stdin": "^6.0.0",
     "lodash": "^4.17.10"
   },
   "optionalDependencies": {
@@ -31,5 +32,8 @@
   "author": "renanhangai <hangai.renan@gmail.com>",
   "devDependencies": {
     "standard-version": "^4.4.0"
+  },
+  "pkg": {
+    "scripts": "src/pkg/index.js"
   }
 }

@@ -6,6 +6,7 @@ const doT = require('dot');
 const Reader = require( "./Reader" );
 const Writer = require( "./Writer" );
 const Util = require( "./Util" );
+const getStdin = require( "get-stdin" );
 
 module.exports = class ConfigBuilder {
 
@@ -49,14 +50,13 @@ module.exports = class ConfigBuilder {
 				return this._add( inputObject, cwd, nextLevel );
 			const file = this._parseFile( input );
 
-			const reader = this._options.readers[file.type];
+			const reader = this._options.readers[file.type || 'json'];
 			if ( !reader )
 				throw new Error( "Invalid type "+file.type );
 
-			const filepath = path.resolve( cwd, file.path );
-			return fs.readFile( filepath, 'utf8' )
+			return this._readInput( cwd, file.path )
 				.then( ( content ) => reader.call( null, content ), ( err ) => ( file.optional ? null : Promise.reject( err ) ) )
-				.then( ( config ) => this._add( config, path.dirname( filepath ), nextLevel ) );
+				.then( ( config ) => this._add( config, path.dirname( path.join( cwd, file.path ) ), nextLevel ) );
 		}
 
 		// Function, call the function
@@ -218,8 +218,9 @@ module.exports = class ConfigBuilder {
 		filename = filename.replace( /\\\:/g, ":" );
 		filename = filename.replace( /\\\+/g, "+" );
 		
-		if ( type == null )
+		if ( type == null && filename !== '-' ) {
 			type = path.extname( filename ).substr(1);
+		}
 		return { path: filename, type: type, optional: optional };
 	}
 
@@ -241,6 +242,13 @@ module.exports = class ConfigBuilder {
 		const obj = {};
 		_.set( obj, configPath, configValue );
 		return obj;
+	}
+
+	_readInput( cwd, filepath ) {
+		if (filepath === '-' )
+			return getStdin();
+		filepath = path.resolve(cwd, filepath);
+		return fs.readFile(filepath, 'utf8');
 	}
 
 	static runFromArgv( argv ) {
