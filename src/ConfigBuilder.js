@@ -21,6 +21,11 @@ module.exports = class ConfigBuilder {
 
 		this._options = options;
 		this._config  = {};
+		Object.defineProperty( this._config, '$env', {
+			get: function() { return process.env; },
+		});
+
+		this._outputConfig = null;
 	}
 	
 	ask( questions ) {
@@ -35,9 +40,9 @@ module.exports = class ConfigBuilder {
 		return this.add( { $answers: answers }, false );
 	}
 
-	add( input, needProcess ) {
-		return Promise.resolve( this._add( input, this._options.cwd ) )
-			.then( () => ( needProcess !== false ? this.process() : null ) )
+	add( input ) {
+		this._outputConfig = null;
+		return Promise.resolve( this._add( input, this._options.cwd ) );
 	}
 	_add( input, cwd, level ) {
 		level = level | 0;
@@ -87,8 +92,10 @@ module.exports = class ConfigBuilder {
 	}
 
 	write( output ) {
+		if ( this._outputConfig == null )
+			this.process();
 		return Promise.resolve( this._write( output ) )
-			.then( () => this._config );
+			.then( () => this._outputConfig );
 	}
 	_write( output ) {
 		// Array, resolve every item independently
@@ -106,7 +113,7 @@ module.exports = class ConfigBuilder {
 				throw new Error( "Invalid type for writing "+file.type );
 
 
-			const config = _.cloneDeep( this._config );
+			const config = _.cloneDeep( this._outputConfig );
 
 			// Stdout writing
 			if ( file.path === '-' ) {
@@ -121,13 +128,13 @@ module.exports = class ConfigBuilder {
 
 		// Function, call
 		if ( typeof(output) === 'function' ) {
-			const config = _.cloneDeep( this._config );
+			const config = _.cloneDeep( this._outputConfig );
 			return Promise.resolve( output.call( null, config ) );
 		}
 		
 		// Object, merge
 		if ( typeof(output) === 'object' ) {
-			_.extend( output, _.cloneDeep( this._config ) );
+			_.extend( output, _.cloneDeep( this._outputConfig ) );
 			return;
 		}
 	}
@@ -166,11 +173,8 @@ module.exports = class ConfigBuilder {
 	 * Process file
 	 */
 	process() {
-		Object.defineProperty( this._config, '$env', {
-			get: function() { return process.env; },
-		});
-		const proxy  = ConfigBuilder._createProxy( this._config, this._config );
-		this._config = JSON.parse( JSON.stringify( proxy ) );
+		const proxy = ConfigBuilder._createProxy( this._config, this._config );
+		this._outputConfig = JSON.parse( JSON.stringify( proxy ) );
 	}
 	/**
 	 * Create the proxy resolving the configuration
