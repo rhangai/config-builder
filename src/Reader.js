@@ -14,6 +14,7 @@ module.exports = class Reader {
 	static readJs( input ) {
 		const vm = require( "vm" );
 		const context = { 
+			require: require,
 			process: { env: process.env },
 			module: { exports: {} },
 		};
