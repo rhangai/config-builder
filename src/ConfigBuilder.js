@@ -6,6 +6,7 @@ const doT = require('dot');
 const Reader = require( "./Reader" );
 const Writer = require( "./Writer" );
 const Util = require( "./Util" );
+const Ask = require( "./Ask" );
 const getStdin = require( "get-stdin" );
 
 module.exports = class ConfigBuilder {
@@ -20,6 +21,13 @@ module.exports = class ConfigBuilder {
 
 		this._options = options;
 		this._config  = {};
+	}
+	
+	ask( questions ) {
+		return Ask( questions, this._options )
+			.then( ( results ) => {
+				console.log( results );
+			});
 	}
 
 	add( input, needProcess ) {
@@ -259,6 +267,7 @@ module.exports = class ConfigBuilder {
 			.option( '-t, --template <paths>', "Compile template files", collect, [] )
 			.option( '-d, --output-dir <dir>', "Directory to output files" )
 			.option( '--depth <depth>', "The maxDepth option" )
+			.option( '--ask <file>', "Ask using inquirer", collect, [] )
 			.arguments( '[inputs...]' )
 			.parse( argv );
 
@@ -268,6 +277,7 @@ module.exports = class ConfigBuilder {
 
 		const outputDir = (program.outputDir || "").split( ":" );
 		return ConfigBuilder.run( program.args, output, {
+			questions: program.ask,
 			maxDepth: program.depth,
 			outputDir: _.findLast( outputDir, Boolean ),
 			template: [].concat( program.template ).filter( Boolean ),
@@ -277,6 +287,7 @@ module.exports = class ConfigBuilder {
 	static run( input, output, options ) {
 		const builder = new ConfigBuilder( options );
 		return Promise.resolve()
+			.then( () => builder.ask( options.questions ) )
 			.then( () => builder.add( input ) )
 			.then( () => builder.compileTemplate( options.template ) )
 			.then( () => builder.write( output ) );

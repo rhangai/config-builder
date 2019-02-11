@@ -1,4 +1,3 @@
-const _ = require( "lodash" );
 module.exports = class Util {
 
 	static asyncEachSeries( list, iterator ) {
