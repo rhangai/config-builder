@@ -27,7 +27,10 @@ function doAsk( questions, options ) {
 	const inquirer = require( "inquirer" );
 	if ( typeof(questions) === 'string' ) {
 		const questionModule = require( path.resolve( options.cwd, questions ) );
-		questions = questionModule.call( null, inquirer, Object.assign( {}, MODULES ) );
+		if ( typeof(questionModule) === 'function' )
+			questions = questionModule.call( null, inquirer, Object.assign( {}, MODULES ) );
+		else
+			questions = questionModule;
 	}
 	questions = [].concat( questions ).filter(Boolean).map(normalizeQuestion);
 	return inquirer.prompt( questions );

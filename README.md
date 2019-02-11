@@ -140,15 +140,30 @@ config-builder \$MY_CONFIG_FILE
 
 Then, the input will be used as process.env.MY_CONFIG_FILE
 
-Environment variable inputs
+Asking for questions
 --------
 
-If the input begins with `$`, then it will be read directly from process.env
-```sh
-config-builder \$MY_CONFIG_FILE
+This modules also uses the inquirer to prompt for values
+
+Create a `questions.js` file:
+```js
+module.exports = [{
+  "type": "input",
+  "name": "username",
+  "message": "What is your username?"
+}]
 ```
 
-Then, the input will be used as process.env.MY_CONFIG_FILE
+Then an input config:
+```json
+{
+  "db": {
+    "username": "{{= it.$answers.name }}",
+  }
+}
+```
+
+If the name is something like: `$env.MY_VAR`, then the environment variable will be overwritten and the default value will be the current environment value
 
 Output directory
 --------
