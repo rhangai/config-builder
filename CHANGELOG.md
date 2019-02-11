@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="0.5.0"></a>
+# [0.5.0](https://github.com/renanhangai/config-builder/compare/v0.4.1...v0.5.0) (2019-02-11)
+
+
+### Bug Fixes
+
+* Configuration of template files using meta variables ([ff923b7](https://github.com/renanhangai/config-builder/commit/ff923b7))
+* Require was not being allowed on reader ([44d9308](https://github.com/renanhangai/config-builder/commit/44d9308))
+
+
+### Features
+
+* Added function for it.$env to get the default value ([248da15](https://github.com/renanhangai/config-builder/commit/248da15))
+
+
+
 <a name="0.4.1"></a>
 ## [0.4.1](https://github.com/renanhangai/config-builder/compare/v0.4.0...v0.4.1) (2019-02-11)
 
