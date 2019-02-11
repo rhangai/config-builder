@@ -21,8 +21,15 @@ module.exports = class ConfigBuilder {
 
 		this._options = options;
 		this._config  = {};
+
+		const envGetter = function( envName, defaultValue = '' ) {
+			if ( process.env.hasOwnProperty( envName ) )
+				return process.env[envName];
+			return defaultValue;
+		}
+		Object.setPrototypeOf(envGetter, process.env);
 		Object.defineProperty( this._config, '$env', {
-			get: function() { return process.env; },
+			value: envGetter,
 		});
 
 		this._outputConfig = null;
