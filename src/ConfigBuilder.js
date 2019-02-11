@@ -25,9 +25,14 @@ module.exports = class ConfigBuilder {
 	
 	ask( questions ) {
 		return Ask( questions, this._options )
-			.then( ( results ) => {
-				console.log( results );
-			});
+			.then( ( answers ) => this._addAnswers( answers ) );
+	}
+	_addAnswers( answers ) {
+		const envOverwrite = answers.$env || {};
+		for( const key in envOverwrite ) {
+			process.env[key] = envOverwrite[key];
+		}
+		return this.add( { $answers: answers }, false );
 	}
 
 	add( input, needProcess ) {
