@@ -31,7 +31,18 @@ module.exports = class EnvCompiler {
 				// Check for environment line and overwrite it with the new variable
 				const match = lineTrim.match(/^(.+?)\=\s*(\w*)(?:\s+(.*))?$/);
 				if (match) {
-					const envName = match[1].trim();
+					let envName = match[1].trim();
+					let optional = false;
+					if ( envName[0] === "#" ) {
+						optional = true;
+						envName = envName.substr(1).trim();
+					}
+
+					// Optional environment variable, do nothing
+					if ( optional && !newContext.$env.$has( envName ) ) {
+						return line;
+					}
+
 					const envValue = newContext.$env( envName, match[2] );
 					return `${envName}=${envValue}`;
 				}
@@ -69,6 +80,7 @@ module.exports = class EnvCompiler {
 			},
 		} );
 		Object.setPrototypeOf(envGetter, proxy);
+		envGetter.$has = check;
 		return envGetter;
 	}
 
