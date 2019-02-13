@@ -216,6 +216,30 @@ A file can also be of another type, by using the `:` modifier.
 By running `config-builder test.txt:json`, the file test.txt will be treated as a json. The same is valid for output files: `config-build input.json -o output.ext:yaml`
 
 
+Template compiling
+------------------
+
+You can also use the config builder to compile template files using the dot compiler
+
+```sh
+# Generate the file.txt by compiling the file.template.txt
+config-builder input.json -t ./file.template.txt:./file.txt
+```
+
+Template compiling .env files
+------------------
+
+Supose you have an env file: `env.template`
+```.env
+# Mode
+APP_ENV=development
+DB_HOST=my-db-host
+```
+
+```sh
+config-builder input.json -t env.template:.env:env
+```
+
 API
 -------------------
 
