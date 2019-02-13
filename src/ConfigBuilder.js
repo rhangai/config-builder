@@ -149,7 +149,10 @@ module.exports = class ConfigBuilder {
 		if ( typeof(template) !== 'string' )
 			return;
 
-		const templatePaths = template.split( ":" );
+		const templatePaths = template
+			.match(/([^\\\:]|\\\:?)+/g)
+			.map( ( i ) => i.replace( '\\:', ':' ) );
+
 		const inPath  = templatePaths[0];
 		const outPath = this._resolveOutputPath( templatePaths[1] );
 		const mode    = templatePaths[2] || null;
