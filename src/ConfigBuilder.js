@@ -2,11 +2,11 @@ const commander = require( "commander" );
 const _ = require( "lodash" );
 const fs = require( "fs-extra" );
 const path = require( "path" );
-const doT = require('dot');
 const Reader = require( "./Reader" );
 const Writer = require( "./Writer" );
 const Util = require( "./Util" );
 const Ask = require( "./Ask" );
+const Compiler = require( "./compiler" );
 const getStdin = require( "get-stdin" );
 
 module.exports = class ConfigBuilder {
@@ -160,13 +160,9 @@ module.exports = class ConfigBuilder {
 		const templatePaths = template.split( ":" );
 		const inPath  = templatePaths[0];
 		const outPath = this._resolveOutputPath( templatePaths[1] );
+		const mode    = templatePaths[2] || null;
 		return fs.readFile( inPath, 'utf8' )
-			.then( ( content ) => {
-				const template = doT.template( content, _.extend( {}, doT.templateSettings, {
-					strip: false,
-				}));
-				return template( this._config );
-			})
+			.then( ( content ) => Compiler.compile( content, this._config, mode ) )
 			.then( ( content ) => fs.outputFile( outPath, content, 'utf8' ) );
 	}
 
@@ -188,10 +184,7 @@ module.exports = class ConfigBuilder {
 	 */
 	static _createProxy( config, root ) {
 		if ( typeof(config) === 'string' ) {
-			const template = doT.template( config, _.extend( {}, doT.templateSettings, {
-				strip: false,
-			}));
-			return template( root );
+			return Compiler.compile( config, root );
 		} else if ( typeof(config) === 'object' ) {
 			const obj = Array.isArray( config ) ? [] : {};
 			root = root || obj;
