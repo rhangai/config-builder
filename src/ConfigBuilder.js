@@ -7,7 +7,9 @@ const Writer = require( "./Writer" );
 const Util = require( "./Util" );
 const Ask = require( "./Ask" );
 const Compiler = require( "./compiler" );
+const EnvCompiler = require( "./compiler/EnvCompiler" );
 const getStdin = require( "get-stdin" );
+const LibUtil = require( "./lib/util" );
 
 module.exports = class ConfigBuilder {
 
@@ -20,18 +22,8 @@ module.exports = class ConfigBuilder {
 		options.writers = _.defaults( options.writers, Writer.getDefaults() );
 
 		this._options = options;
-		this._config  = {};
-
-		const envGetter = function( envName, defaultValue = '' ) {
-			if ( process.env.hasOwnProperty( envName ) )
-				return process.env[envName];
-			return defaultValue;
-		}
-		Object.setPrototypeOf(envGetter, process.env);
-		Object.defineProperty( this._config, '$env', {
-			value: envGetter,
-		});
-
+		this._config  = EnvCompiler.createEnvContext({}, [process.env] );
+		this._config.$util = LibUtil;
 		this._outputConfig = null;
 	}
 	

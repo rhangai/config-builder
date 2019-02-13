@@ -1,5 +1,6 @@
 const COMPILERS = {
 	'dot': require( './DotCompiler' ),
+	'env': require( './EnvCompiler' ),
 };
 
 module.exports = {
