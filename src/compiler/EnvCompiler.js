@@ -29,7 +29,7 @@ module.exports = class EnvCompiler {
 					return false;
 
 				// Check for environment line and overwrite it with the new variable
-				const match = lineTrim.match(/^(.+?)\=\s*(\w*)(?:\s+(.*))?$/);
+				const match = lineTrim.match(/^(.+?)\=(.*)$/);
 				if (match) {
 					let envName = match[1].trim();
 					let optional = false;
@@ -43,7 +43,7 @@ module.exports = class EnvCompiler {
 						return line;
 					}
 
-					const envValue = newContext.$env( envName, match[2] );
+					const envValue = newContext.$env( envName, match[2].trim() );
 					return `${envName}=${envValue}`;
 				}
 				return line;
