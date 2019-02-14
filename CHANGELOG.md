@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="0.7.0"></a>
+# [0.7.0](https://github.com/renanhangai/config-builder/compare/v0.6.2...v0.7.0) (2019-02-14)
+
+
+### Features
+
+* Added shell mode for config-builder ([38308a7](https://github.com/renanhangai/config-builder/commit/38308a7))
+
+
+
 <a name=""></a>
 # [](https://github.com/renanhangai/config-builder/compare/v0.6.2...v) (2019-02-14)
 
