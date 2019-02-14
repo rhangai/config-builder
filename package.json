@@ -1,6 +1,6 @@
 {
   "name": "@renanhangai/config-builder",
-  "version": "0.6.2",
+  "version": null,
   "keywords": [
     "config",
     "configuration",
@@ -37,6 +37,8 @@
   },
   "pkg": {
     "scripts": "src/pkg/index.js",
-    "assets": ["assets/**/*"]
+    "assets": [
+      "assets/**/*"
+    ]
   }
 }
