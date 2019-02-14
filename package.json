@@ -36,6 +36,7 @@
     "standard-version": "^4.4.0"
   },
   "pkg": {
-    "scripts": "src/pkg/index.js"
+    "scripts": "src/pkg/index.js",
+    "assets": ["assets/**/*"]
   }
 }

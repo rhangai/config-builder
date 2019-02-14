@@ -1,0 +1,23 @@
+#!/bin/bash
+
+CONFIG_BUILDER_IMAGE=${CONFIG_BUILDER_IMAGE:-renanhangai/config-builder}
+
+function config-builder {
+	local DOCKER_FLAGS="--rm -i --user $(id -u):$(id -g) -v $PWD:/config";
+	if [ -n "${CONFIG_BUILDER_TTY}" ]; then
+		if [ -t 1 ]; then
+			DOCKER_FLAGS="${DOCKER_FLAGS} -t"
+		fi
+	fi
+	DOCKER_FLAGS="${DOCKER_FLAGS} $(--config-builder_build-whitelist)"
+	docker run ${DOCKER_FLAGS} "${CONFIG_BUILDER_IMAGE}" "$@"
+}
+
+function --config-builder_build-whitelist {
+	for item in $CONFIG_BUILDER_WHITELIST; do
+		if [[ -v "$item" ]]; then
+			echo "-e $item";
+		fi
+	done
+	return 0;
+}

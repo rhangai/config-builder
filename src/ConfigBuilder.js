@@ -10,6 +10,7 @@ const Compiler = require( "./compiler" );
 const EnvCompiler = require( "./compiler/EnvCompiler" );
 const getStdin = require( "get-stdin" );
 const LibUtil = require( "./lib/util" );
+const ShellOutput = require( "./shell" );
 
 module.exports = class ConfigBuilder {
 
@@ -270,10 +271,16 @@ module.exports = class ConfigBuilder {
 			.option( '-o, --output <paths>', "Output files", collect, [] )
 			.option( '-t, --template <paths>', "Compile template files", collect, [] )
 			.option( '-d, --output-dir <dir>', "Directory to output files" )
+			.option( '--shell <type>', "Provides a shell script according to the type" )
 			.option( '--depth <depth>', "The maxDepth option" )
 			.option( '--ask <file>', "Ask using inquirer", collect, [] )
 			.arguments( '[inputs...]' )
 			.parse( argv );
+
+		if ( program.shell ) {
+			return Promise.resolve()
+				.then( () => ShellOutput.print( program.shell ) );
+		}
 
 		let output = program.output;
 		if ( !output || ( output.length <= 0 ) )
