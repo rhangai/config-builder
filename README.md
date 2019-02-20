@@ -253,3 +253,26 @@ ConfigBuilder.run( [ "fileA.json", "fileB.yml" ], "output.json" )
 		console.log( "Files written." );
 	});
 ```
+
+Docker
+-----------------
+
+There is an image available to use with docker if you do not wish to install node on your machine.
+
+```sh
+docker run --rm -i renanhangai/config-builder --help
+```
+You can even alias it: `alias config-builder="docker run --rm -i renanhangai/config-builder"`
+
+In case you are developing automated scripts with it, i recommend you sourcing:
+```bash
+# Include script
+CONFIG_BUILDER_IMAGE=renanhangai/config-builder
+eval $(docker run --rm -i "${CONFIG_BUILDER_IMAGE}" --shell docker-bash)
+
+# Run the config-builder
+config-builder ...
+
+# If you with to pass environment variables to the build, you must whitelist as docker does not read by default the current env
+CONFIG_BUILDER_WHITELIST="DEBUG MY_VAR" config-builder ...
+```
