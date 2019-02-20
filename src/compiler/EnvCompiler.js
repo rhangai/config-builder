@@ -27,6 +27,8 @@ module.exports = class EnvCompiler {
 				// Check if the line must be deleted
 				if ( lineTrim.substr(0, 3) === '#!#' )
 					return false;
+				if ( lineTrim.substr(0,2) === '#!' )
+					return lineTrim.substr(2);
 
 				// Check for environment line and overwrite it with the new variable
 				const match = lineTrim.match(/^(.+?)\=(.*)$/);
