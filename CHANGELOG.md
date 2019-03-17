@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="0.9.0"></a>
+# [0.9.0](https://github.com/renanhangai/config-builder/compare/v0.8.0...v0.9.0) (2019-03-17)
+
+
+### Features
+
+* Added --env and --no-env options ([936fb48](https://github.com/renanhangai/config-builder/commit/936fb48))
+
+
+
 <a name="0.8.0"></a>
 # [0.8.0](https://github.com/renanhangai/config-builder/compare/v0.7.0...v0.8.0) (2019-02-20)
 
