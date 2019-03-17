@@ -11,6 +11,7 @@ const EnvCompiler = require( "./compiler/EnvCompiler" );
 const getStdin = require( "get-stdin" );
 const LibUtil = require( "./lib/util" );
 const ShellOutput = require( "./shell" );
+const DotEnv = require("dotenv");
 
 module.exports = class ConfigBuilder {
 
@@ -274,6 +275,7 @@ module.exports = class ConfigBuilder {
 			.option( '--env <file>', "Environment file to load (default: .env)" )
 			.option( '--no-env', "Do NOT load any environment file" )
 			.option( '--shell <type>', "Provides a shell script according to the type" )
+			.option( '--shell-option <option>', "Provides a shell option", collectObject, {} )
 			.option( '--depth <depth>', "The maxDepth option" )
 			.option( '--ask <file>', "Ask using inquirer", collect, [] )
 			.arguments( '[inputs...]' )
@@ -282,14 +284,15 @@ module.exports = class ConfigBuilder {
 
 		// Load environment variables
 		if ( program.env !== false ) {
-			require("dotenv").load({
-				path: path.resolve(program.env || '.env'),
+			const envPath = (program.env === true || program.env == null) ? ".env" : program.env;
+			DotEnv.load({
+				path: path.resolve(envPath),
 			});
 		}
 
 		if ( program.shell ) {
 			return Promise.resolve()
-				.then( () => ShellOutput.print( program.shell ) );
+				.then( () => ShellOutput.print( program.shell, program.shellOption ) );
 		}
 
 		let output = program.output;
@@ -319,5 +322,16 @@ module.exports = class ConfigBuilder {
 // Collect for argument
 function collect(val, memo) {
 	memo.push(val);
+	return memo;
+}
+function collectObject(val, memo) {
+	const equalSignIndex = val.indexOf( '=' );
+	const value = equalSignIndex >= 0 ? [val.substr(0, equalSignIndex), val.substr(equalSignIndex+1)] : [val];
+	if ( value.length === 0 )
+		return memo;
+	else if ( value.length === 1 )
+		memo[value[0].trim()] = true;
+	else if ( value.length === 2 )
+		memo[value[0].trim()] = value[1].trim();
 	return memo;
 }
