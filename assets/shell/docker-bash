@@ -1,9 +1,18 @@
 #!/bin/bash
 
+# Check for config-builder
 if [ ! -x "$(command -v config-builder)" ]; then
-	if [ -x "$(command -v npx)" ]; then
+	if [ -x "$(command -v yarn)" ] && [ ! -z "$(yarn list | grep renanhangai/config-builder)" ]; then
 		function config-builder {
-			npx --package "@renanhangai/config-builder" config-builder "$@"
+			yarn run --silent "config-builder" "$@"
+		}
+	elif [ -x "$(command -v npm)" ] && [ ! -z "$(npm list --parseable | grep renanhangai/config-builder)" ]; then
+		function config-builder {
+			npm run --silent "config-builder" "$@"
+		}
+	elif [ -x "$(command -v npx)" ]; then
+		function config-builder {
+			npx --quiet --package "@renanhangai/config-builder" config-builder "$@"
 		}
 	else
 		CONFIG_BUILDER_IMAGE=${CONFIG_BUILDER_IMAGE:-renanhangai/config-builder}
