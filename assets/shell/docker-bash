@@ -29,7 +29,7 @@ if [ ! -x "$(command -v config-builder)" ]; then
 		function --config-builder_build-whitelist {
 			while read -r line; do
 				split=(${line//=/ })
-				echo "${split[0]}"
+				echo "-e ${split[0]}"
 			done < <(env)
 			return 0;
 		}
