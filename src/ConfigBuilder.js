@@ -271,11 +271,21 @@ module.exports = class ConfigBuilder {
 			.option( '-o, --output <paths>', "Output files", collect, [] )
 			.option( '-t, --template <paths>', "Compile template files", collect, [] )
 			.option( '-d, --output-dir <dir>', "Directory to output files" )
+			.option( '--env <file>', "Environment file to load (default: .env)" )
+			.option( '--no-env', "Do NOT load any environment file" )
 			.option( '--shell <type>', "Provides a shell script according to the type" )
 			.option( '--depth <depth>', "The maxDepth option" )
 			.option( '--ask <file>', "Ask using inquirer", collect, [] )
 			.arguments( '[inputs...]' )
 			.parse( argv );
+
+
+		// Load environment variables
+		if ( program.env !== false ) {
+			require("dotenv").load({
+				path: path.resolve(program.env || '.env'),
+			});
+		}
 
 		if ( program.shell ) {
 			return Promise.resolve()
