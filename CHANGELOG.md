@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="0.11.0"></a>
+# [0.11.0](https://github.com/renanhangai/config-builder/compare/v0.10.0...v0.11.0) (2019-04-14)
+
+
+### Features
+
+* Updated envTemplate to compile and replace env-variables ([8929f8d](https://github.com/renanhangai/config-builder/commit/8929f8d))
+
+
+
 <a name="0.10.0"></a>
 # [0.10.0](https://github.com/renanhangai/config-builder/compare/v0.9.3...v0.10.0) (2019-04-04)
 
