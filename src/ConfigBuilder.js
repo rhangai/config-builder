@@ -263,7 +263,7 @@ module.exports = class ConfigBuilder {
 
 		// Load environment variables
 		if (program.env !== false) {
-			let envPath = program.env === true || program.env == null ? ['.env', '.local.env'] : program.env;
+			let envPath = program.env === true || program.env == null ? ['.env', '.env.local'] : program.env;
 			envPath = []
 				.concat(envPath)
 				.filter(Boolean)
