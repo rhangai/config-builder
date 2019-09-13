@@ -267,6 +267,7 @@ module.exports = class ConfigBuilder {
 			envPath = []
 				.concat(envPath)
 				.filter(Boolean)
+				.reverse()
 				.forEach(file => {
 					DotEnv.config({
 						path: path.resolve(file),
