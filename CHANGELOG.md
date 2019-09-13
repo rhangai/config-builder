@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.11.3](https://github.com/renanhangai/config-builder/compare/v0.11.2...v0.11.3) (2019-09-13)
+
+
+### Bug Fixes
+
+* Default local env file ([85d3d78](https://github.com/renanhangai/config-builder/commit/85d3d78))
+
 ### [0.11.2](https://github.com/renanhangai/config-builder/compare/v0.11.1...v0.11.2) (2019-09-13)
 
 
