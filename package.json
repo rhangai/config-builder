@@ -33,7 +33,7 @@
   "repository": "https://github.com/renanhangai/config-builder.git",
   "author": "renanhangai <hangai.renan@gmail.com>",
   "devDependencies": {
-    "standard-version": "^7.0.0"
+    "standard-version": "^8.0.1"
   },
   "pkg": {
     "scripts": "src/pkg/index.js",
